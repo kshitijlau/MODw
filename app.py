@@ -174,17 +174,16 @@ Analyze a list of raw comments for an individual and generate a single, final su
 
 def generate_summary_from_llm(prompt):
     """
-    FIXED: This function now makes a real API call to the Azure OpenAI gpt-4o model
+    Makes a real API call to the Azure OpenAI gpt-4o model
     to generate a unique, high-quality summary based on the provided prompt.
-    It reads credentials from st.secrets using a simpler format.
+    It reads credentials from st.secrets.
     """
     try:
-        # Get credentials from Streamlit secrets with a simpler structure
+        # Get credentials from Streamlit secrets
         azure_endpoint = st.secrets["azure_endpoint"]
         api_key = st.secrets["azure_api_key"]
         deployment_name = st.secrets["azure_deployment_name"]
-        # A common API version is used here. You might need to update it based on your Azure setup.
-        api_version = "2024-02-01" 
+        api_version = "2024-02-01" # A common API version
 
         # Initialize the AzureOpenAI client
         client = AzureOpenAI(
@@ -201,17 +200,15 @@ def generate_summary_from_llm(prompt):
             model=deployment_name,
             messages=message_text,
             temperature=0.7,
-            max_tokens=1000, # Increased to ensure enough space for both languages
+            max_tokens=1000,
             top_p=0.95,
             frequency_penalty=0,
             presence_penalty=0,
             stop=None
         )
 
-        # Parse the response
         full_response_text = completion.choices[0].message.content
 
-        # Split English and Arabic summaries
         if '---ARABIC_SUMMARY---' in full_response_text:
             eng_summary, ar_summary = full_response_text.split('---ARABIC_SUMMARY---', 1)
             return eng_summary.strip(), ar_summary.strip()
@@ -219,11 +216,11 @@ def generate_summary_from_llm(prompt):
             return full_response_text.strip(), "Arabic summary could not be parsed. Delimiter '---ARABIC_SUMMARY---' not found."
 
     except KeyError as e:
-        st.error(f"Missing Secret: Please ensure your secrets.toml file contains the necessary Azure OpenAI credentials. Missing key: {e}")
+        st.error(f"Missing Secret: The application could not find the key '{e}' in your Streamlit Cloud secrets. Please verify it is set correctly on the website.")
         return "Error: Missing configuration.", "Error: Missing configuration."
     except Exception as e:
         st.error(f"An error occurred while calling the OpenAI API: {e}")
-        return f"Error: API call failed.", "Error: API call failed."
+        return "Error: API call failed.", "Error: API call failed."
 
 
 def process_scores(df):
@@ -289,11 +286,20 @@ def process_comments_and_append(results_df, comments_df):
 st.set_page_config(layout="wide")
 st.title("📄 Integrated Performance Summary Generator (Azure OpenAI)")
 
-# --- ADDED: Instructions for setting up secrets.toml ---
+# --- ADDED: Debugging Section ---
+with st.expander("Secrets Debug Information (Temporary)"):
+    st.write("This section helps diagnose issues with secrets on Streamlit Cloud.")
+    if all(k in st.secrets for k in ["azure_endpoint", "azure_api_key", "azure_deployment_name"]):
+        st.success("All required secrets (azure_endpoint, azure_api_key, azure_deployment_name) are loaded successfully!")
+        st.write("Endpoint:", st.secrets["azure_endpoint"])
+    else:
+        st.error("One or more required secrets are missing. Please check your secrets configuration on the Streamlit Community Cloud settings page.")
+        st.write("Keys found in secrets:", list(st.secrets.keys()))
+st.markdown("---")
+
+
 st.info("""
-    **First-Time Setup:** This application requires an Azure OpenAI API key.
-    1.  Create a file named `secrets.toml` in a `.streamlit` directory in your app's root folder.
-    2.  Add your credentials to the file in the following simplified format:
+    **First-Time Setup:** This application requires an Azure OpenAI API key. On Streamlit Cloud, go to your app's "Settings" > "Secrets" and add the following keys:
     ```toml
     azure_endpoint = "YOUR_AZURE_OPENAI_ENDPOINT"
     azure_api_key = "YOUR_AZURE_OPENAI_API_KEY"
@@ -375,4 +381,3 @@ elif 'results_df' in st.session_state and 'final_df' not in st.session_state:
         file_name="score_based_summaries.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
