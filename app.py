@@ -117,6 +117,7 @@ You will receive a data set for one individual containing: 8 Competency Names an
         * The same logic applies if all are 'Potential Strengths' or all are 'Development Areas'. This ensures a minimum of two paragraphs.
 
 **## Writing Standards & Constraints**
+* **No Scores:** The summary must NEVER mention specific numerical scores or averages. It should only contain the qualitative interpretation of the data.
 * **Word Count:** Maximum 400 words total per language (excluding the mandatory opening).
 * **Source Fidelity:** Base all statements *strictly* on the indicator language.
 * **Behavioral Focus:** No technical or industry-specific jargon.
@@ -242,6 +243,7 @@ def process_scores(df):
         for j in range(8):
             comp_col_index = 1 + (j * 5)
             if comp_col_index >= len(df.columns): break
+            # IMPORTANT: We pass the average score for the AI to categorize, but the prompt forbids it from writing it.
             person_data_prompt += f"\n**- Competency: {df.columns[comp_col_index]}** (Average Score: {row[comp_col_index]})\n"
             for k in range(4):
                 ind_col_index = comp_col_index + 1 + k
