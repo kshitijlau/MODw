@@ -121,7 +121,7 @@ You will receive a data set for one individual containing: 8 Competency Names an
 * **Word Count:** Maximum 400 words total per language (excluding the mandatory opening).
 * **Source Fidelity:** Base all statements *strictly* on the indicator language.
 * **Behavioral Focus:** No technical or industry-specific jargon.
-* **Output Separator:** You MUST separate the English summary from the Arabic summary with the exact delimiter: '---ARABIC_SUMMARY---'.
+* **MANDATORY Output Separator:** It is CRITICAL that you separate the English summary from the Arabic summary with the exact delimiter on its own line: '---ARABIC_SUMMARY---'. The parsing of the output depends entirely on this delimiter.
 
 **## Bilingual Generation Mandate**
 * Generate in **both English and Arabic**, following the same dynamic structure and professional tone.
@@ -159,7 +159,7 @@ Analyze a list of raw comments for an individual and generate a single, final su
 * **Word Count:** Maximum 50 words per language.
 * **Tone:** Professional, constructive, and forward-looking.
 * **Consistency:** The summary MUST NOT contradict the main report.
-* **Output Separator:** You MUST separate the English summary from the Arabic summary with the exact delimiter: '---ARABIC_SUMMARY---'.
+* **MANDATORY Output Separator:** It is CRITICAL that you separate the English summary from the Arabic summary with the exact delimiter on its own line: '---ARABIC_SUMMARY---'. The parsing of the output depends entirely on this delimiter.
 
 
 **## Bilingual Generation Mandate: English and Arabic**
@@ -177,7 +177,7 @@ def generate_summary_from_llm(prompt):
     """
     Makes a real API call to the Azure OpenAI gpt-4o model
     to generate a unique, high-quality summary based on the provided prompt.
-    It reads credentials from st.secrets.
+    It reads credentials from st.secrets and includes robust parsing logic.
     """
     try:
         # Get credentials from Streamlit secrets
@@ -193,10 +193,8 @@ def generate_summary_from_llm(prompt):
             api_version=api_version,
         )
 
-        # Create the payload for the API call
         message_text = [{"role": "user", "content": prompt}]
 
-        # Make the API call
         completion = client.chat.completions.create(
             model=deployment_name,
             messages=message_text,
@@ -210,11 +208,29 @@ def generate_summary_from_llm(prompt):
 
         full_response_text = completion.choices[0].message.content
 
+        # --- UPDATED PARSING LOGIC ---
+        # Primary method: Split by the mandatory delimiter
         if '---ARABIC_SUMMARY---' in full_response_text:
             eng_summary, ar_summary = full_response_text.split('---ARABIC_SUMMARY---', 1)
             return eng_summary.strip(), ar_summary.strip()
+        
+        # Fallback method: Look for the standard Arabic opening phrases if the delimiter is missing
+        elif "نشكرك على مشاركتك" in full_response_text:
+            parts = full_response_text.split("نشكرك على مشاركتك", 1)
+            eng_summary = parts[0].strip()
+            ar_summary = "نشكرك على مشاركتك" + parts[1].strip()
+            return eng_summary, ar_summary
+            
+        elif "بالإضافة إلى ذلك، تشير الملاحظات" in full_response_text:
+            parts = full_response_text.split("بالإضافة إلى ذلك، تشير الملاحظات", 1)
+            eng_summary = parts[0].strip()
+            ar_summary = "بالإضافة إلى ذلك، تشير الملاحظات" + parts[1].strip()
+            return eng_summary, ar_summary
+        
+        # If both methods fail, return the error message
         else:
-            return full_response_text.strip(), "Arabic summary could not be parsed. Delimiter '---ARABIC_SUMMARY---' not found."
+            return full_response_text.strip(), "Arabic summary could not be parsed. Delimiter and fallback markers were not found."
+        # --- END OF UPDATED PARSING LOGIC ---
 
     except KeyError as e:
         st.error(f"Missing Secret: The application could not find the key '{e}' in your Streamlit Cloud secrets. Please verify it is set correctly on the website.")
@@ -243,7 +259,6 @@ def process_scores(df):
         for j in range(8):
             comp_col_index = 1 + (j * 5)
             if comp_col_index >= len(df.columns): break
-            # IMPORTANT: We pass the average score for the AI to categorize, but the prompt forbids it from writing it.
             person_data_prompt += f"\n**- Competency: {df.columns[comp_col_index]}** (Average Score: {row[comp_col_index]})\n"
             for k in range(4):
                 ind_col_index = comp_col_index + 1 + k
