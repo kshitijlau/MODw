@@ -84,7 +84,7 @@ def get_score_summary_prompt():
 You are an expert talent management analyst and a master writer. Your style is formal, professional, objective, and constructive. You synthesize quantitative performance data into a rich, qualitative, behavioral-focused narrative. You are writing for a male individual, using the third person (`he`/`his`/`him`).
 
 **## Core Objective**
-Generate a sophisticated, multi-paragraph performance summary based on scores from 8 leadership competencies. The summary must be generated in both English and Arabic.
+Generate a sophisticated, multi-paragraph **English** performance summary based on scores from 8 leadership competencies.
 
 **## Input Data Profile**
 You will receive a data set for one individual containing: 8 Competency Names and their average scores, plus 4 Indicator Scores and Texts for each competency.
@@ -115,14 +115,9 @@ You will receive a data set for one individual containing: 8 Competency Names an
 
 **## Writing Standards & Constraints**
 * **No Scores:** The summary must NEVER mention specific numerical scores or averages.
-* **Word Count:** Maximum 400 words total per language (excluding the mandatory opening).
+* **Word Count:** Maximum 400 words (excluding the mandatory opening).
 * **Source Fidelity:** Base all statements *strictly* on the indicator language.
 * **Behavioral Focus:** No technical or industry-specific jargon.
-* **MANDATORY Output Separator:** It is CRITICAL that you separate the English summary from the Arabic summary with the exact delimiter on its own line: '---ARABIC_SUMMARY---'.
-
-**## Bilingual Generation Mandate**
-* Generate in **both English and Arabic**, following the same dynamic structure and professional tone.
-* **Arabic Opening:** The first sentence thanking the participant MUST be in formal, written Arabic (`Lughat al-Fusha`).
 
 ---
 **## TASK: GENERATE SCORE-BASED SUMMARY FOR THE FOLLOWING PERSON**
@@ -132,10 +127,10 @@ def get_comment_summary_prompt():
     """Returns the new, specialized prompt for summarizing qualitative comments."""
     return """
 **## Persona**
-You are a discerning talent management analyst, skilled at synthesizing raw, unstructured feedback into a concise and professional summary. Your focus is purely on constructive, developmental themes.
+You are a discerning talent management analyst, skilled at synthesizing raw, unstructured feedback into a concise and professional **English** summary. Your focus is purely on constructive, developmental themes.
 
 **## Core Objective**
-Analyze a list of raw comments for an individual and generate a single, final summary paragraph. This paragraph should be no more than 50 words. The summary must be in both English and Arabic.
+Analyze a list of raw comments for an individual and generate a single, final summary paragraph in English. This paragraph should be no more than 50 words.
 
 **## Input Data Profile**
 1.  **The Main Report:** The already-written, score-based summary.
@@ -153,37 +148,45 @@ Analyze a list of raw comments for an individual and generate a single, final su
 5.  **Final Polish:** Ensure the paragraph flows naturally when appended to the main report.
 
 **## Writing Standards & Constraints**
-* **Word Count:** Maximum 50 words per language.
+* **Word Count:** Maximum 50 words.
 * **Tone:** Professional, constructive, and forward-looking.
 * **Consistency:** The summary MUST NOT contradict the main report.
-* **MANDATORY Output Separator:** It is CRITICAL that you separate the English summary from the Arabic summary with the exact delimiter on its own line: '---ARABIC_SUMMARY---'.
-
-
-**## Bilingual Generation Mandate: English and Arabic**
-* **Primary Task:** Generate the summary in **both English and Arabic**, following all rules above.
-* **Arabic Language Standards:**
-    * **Nuance and Professionalism:** The Arabic translation must not be a literal, word-for-word translation. It must be crafted with the nuance, formality, and flow of a native Arabic-speaking HR professional.
-    * **Tone:** The tone should be formal, respectful, and constructive, using professional terminology appropriate for a corporate setting.
-    * **Contextual Integrity:** Ensure the meaning and intent of the developmental feedback are preserved and culturally aligned.
 
 ---
 **## TASK: ANALYZE THE FOLLOWING COMMENTS AND GENERATE A 50-WORD SUMMARY PARAGRAPH TO APPEND TO THE MAIN REPORT PROVIDED.**
 """
 
-def generate_summary_from_llm(prompt):
-    """
-    Makes a real API call to the Azure OpenAI gpt-4o model
-    to generate a unique, high-quality summary based on the provided prompt.
-    It reads credentials from st.secrets and includes robust parsing logic.
-    """
+def get_translation_prompt():
+    """Returns a new, dedicated prompt for translating text to Arabic."""
+    return """
+**## Persona**
+You are an expert translator specializing in professional HR and talent management content.
+
+**## Core Objective**
+Translate the provided English text into formal, professional Arabic (`Lughat al-Fusha`).
+
+**## Core Logic & Execution Flow**
+1.  Read the English text provided after the '---' delimiter.
+2.  Translate it into Arabic, ensuring the translation is not literal but captures the professional nuance, tone, and intent of the original text.
+3.  The opening sentence about "participation in the assessment center" must be particularly formal and well-written.
+4.  Maintain all formatting, such as paragraphs and bolded text.
+
+**## Writing Standards & Constraints**
+* **Language:** Formal, written Arabic.
+* **Tone:** Professional, respectful, and constructive.
+* **Accuracy:** Preserve the original meaning perfectly.
+
+---
+"""
+
+def call_azure_openai(prompt):
+    """A single, reusable function to call the Azure OpenAI API."""
     try:
-        # Get credentials from Streamlit secrets
         azure_endpoint = st.secrets["azure_endpoint"]
         api_key = st.secrets["azure_api_key"]
         deployment_name = st.secrets["azure_deployment_name"]
-        api_version = "2024-02-01" # A common API version
+        api_version = "2024-02-01"
 
-        # Initialize the AzureOpenAI client
         client = AzureOpenAI(
             azure_endpoint=azure_endpoint,
             api_key=api_key,
@@ -196,45 +199,20 @@ def generate_summary_from_llm(prompt):
             model=deployment_name,
             messages=message_text,
             temperature=0.7,
-            max_tokens=1000,
+            max_tokens=1500,
             top_p=0.95,
             frequency_penalty=0,
             presence_penalty=0,
             stop=None
         )
-
-        full_response_text = completion.choices[0].message.content
-
-        # --- UPDATED PARSING LOGIC ---
-        # Primary method: Split by the mandatory delimiter
-        if '---ARABIC_SUMMARY---' in full_response_text:
-            eng_summary, ar_summary = full_response_text.split('---ARABIC_SUMMARY---', 1)
-            return eng_summary.strip(), ar_summary.strip()
-        
-        # Fallback method: Look for the standard Arabic opening phrases if the delimiter is missing
-        elif "نشكرك على مشاركتك" in full_response_text:
-            parts = full_response_text.split("نشكرك على مشاركتك", 1)
-            eng_summary = parts[0].strip()
-            ar_summary = "نشكرك على مشاركتك" + parts[1].strip()
-            return eng_summary, ar_summary
-            
-        elif "بالإضافة إلى ذلك، تشير الملاحظات" in full_response_text:
-            parts = full_response_text.split("بالإضافة إلى ذلك، تشير الملاحظات", 1)
-            eng_summary = parts[0].strip()
-            ar_summary = "بالإضافة إلى ذلك، تشير الملاحظات" + parts[1].strip()
-            return eng_summary, ar_summary
-        
-        # If both methods fail, return the error message
-        else:
-            return full_response_text.strip(), "Arabic summary could not be parsed. Delimiter and fallback markers were not found."
-        # --- END OF UPDATED PARSING LOGIC ---
+        return completion.choices[0].message.content.strip()
 
     except KeyError as e:
-        st.error(f"Missing Secret: The application could not find the key '{e}' in your Streamlit Cloud secrets. Please verify it is set correctly on the website.")
-        return "Error: Missing configuration.", "Error: Missing configuration."
+        st.error(f"Missing Secret: Could not find '{e}'. Please check your Streamlit Cloud secrets.")
+        return f"Error: Missing configuration for '{e}'."
     except Exception as e:
         st.error(f"An error occurred while calling the OpenAI API: {e}")
-        return "Error: API call failed.", "Error: API call failed."
+        return "Error: API call failed."
 
 
 def process_scores(df):
@@ -243,6 +221,7 @@ def process_scores(df):
     indicator_definitions = df.iloc[0]
     people_data = df.iloc[1:]
     score_prompt_template = get_score_summary_prompt()
+    translation_prompt_template = get_translation_prompt()
 
     progress_bar = st.progress(0)
     total_people = len(people_data)
@@ -250,7 +229,7 @@ def process_scores(df):
         person_name = row.iloc[0]
         if pd.isna(person_name) or 'ERROR' in str(row.iloc[1]): continue
         
-        st.write(f"Generating summary for {person_name}...")
+        st.write(f"Generating English summary for {person_name}...")
 
         person_data_prompt = f"**Person's Name:** {person_name}\n\n**Competency Data:**\n"
         for j in range(8):
@@ -262,8 +241,16 @@ def process_scores(df):
                 if ind_col_index >= len(df.columns): break
                 person_data_prompt += f"  - Indicator: '{indicator_definitions[ind_col_index]}' | Score: {row[ind_col_index]}\n"
 
-        full_prompt = score_prompt_template + person_data_prompt
-        eng_summary, ar_summary = generate_summary_from_llm(full_prompt)
+        # --- TWO-STEP GENERATION ---
+        # 1. Generate English Summary
+        full_eng_prompt = score_prompt_template + person_data_prompt
+        eng_summary = call_azure_openai(full_eng_prompt)
+
+        # 2. Generate Arabic Translation
+        st.write(f"Translating summary for {person_name} to Arabic...")
+        full_ar_prompt = translation_prompt_template + eng_summary
+        ar_summary = call_azure_openai(full_ar_prompt)
+        
         results.append({"Person": person_name, "English Summary": eng_summary, "Arabic Summary": ar_summary})
         progress_bar.progress((i + 1) / total_people)
         
@@ -272,6 +259,7 @@ def process_scores(df):
 def process_comments_and_append(results_df, comments_df):
     """Processes comments and appends them to the existing summaries."""
     comment_prompt_template = get_comment_summary_prompt()
+    translation_prompt_template = get_translation_prompt()
     
     progress_bar = st.progress(0)
     total_people = len(results_df)
@@ -284,12 +272,19 @@ def process_comments_and_append(results_df, comments_df):
         if person_comments:
             st.write(f"Summarizing comments for {person_code}...")
             comment_data_prompt = f"**Main Report:**\n{main_eng_summary}\n\n**Raw Comments to Summarize:**\n- {'\n- '.join(person_comments)}"
-            full_prompt = comment_prompt_template + comment_data_prompt
             
-            eng_comment_summary, ar_summary = generate_summary_from_llm(full_prompt)
+            # --- TWO-STEP GENERATION FOR COMMENTS ---
+            # 1. Generate English Comment Summary
+            full_eng_prompt = comment_prompt_template + comment_data_prompt
+            eng_comment_summary = call_azure_openai(full_eng_prompt)
+
+            # 2. Translate English Comment Summary to Arabic
+            st.write(f"Translating comments for {person_code}...")
+            full_ar_prompt = translation_prompt_template + eng_comment_summary
+            ar_comment_summary = call_azure_openai(full_ar_prompt)
 
             results_df.at[i, 'English Summary'] += f"\n\n{eng_comment_summary}"
-            results_df.at[i, 'Arabic Summary'] += f"\n\n{ar_summary}"
+            results_df.at[i, 'Arabic Summary'] += f"\n\n{ar_comment_summary}"
         
         progress_bar.progress((i + 1) / total_people)
             
@@ -300,7 +295,6 @@ def process_comments_and_append(results_df, comments_df):
 st.set_page_config(layout="wide")
 st.title("📄 Integrated Performance Summary Generator (Azure OpenAI)")
 
-# --- ADDED: Debugging Section ---
 with st.expander("Secrets Debug Information (Temporary)"):
     st.write("This section helps diagnose issues with secrets on Streamlit Cloud.")
     if all(k in st.secrets for k in ["azure_endpoint", "azure_api_key", "azure_deployment_name"]):
