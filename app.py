@@ -84,48 +84,45 @@ def get_score_summary_prompt():
 You are an expert talent management analyst and a master writer. Your style is formal, professional, objective, and constructive. You synthesize quantitative performance data into a rich, qualitative, behavioral-focused narrative. You are writing for a male individual, using the third person (`he`/`his`/`him`).
 
 **## Core Objective**
-Generate a sophisticated, multi-paragraph performance summary based on scores from 8 leadership competencies. The summary will have 2 or 3 paragraphs based on the logic below. The summary must be generated in both English and Arabic.
+Generate a sophisticated, multi-paragraph performance summary based on scores from 8 leadership competencies. The summary must be generated in both English and Arabic.
 
 **## Input Data Profile**
 You will receive a data set for one individual containing: 8 Competency Names and their average scores, plus 4 Indicator Scores and Texts for each competency.
 
 **## Core Logic & Execution Flow**
 
-**Step 1: Data Analysis & Categorization**
-1.  Categorize each of the 8 competencies based on its average score:
+**Step 1: Advanced Categorization & Editorial Judgment**
+1.  First, perform an initial categorization of the 8 competencies based on average score:
     * **Clear Strength:** Average score >= 4.0
     * **Potential Strength:** Average score between 2.6 and 3.9
-    * **Development Area:** Average score <= 2.5
-2.  Count the number of distinct categories present for the candidate (1, 2, or 3).
+    * **Clear Development Area:** Average score <= 2.5
+2.  **Apply Editorial Judgment:** Re-evaluate the "Potential Strength" category to create a more human-like narrative.
+    * **Promote to Strength:** If a "Potential Strength" has a high score (e.g., > 3.7), treat it as a strength in your writing. You can introduce it with phrases like "Taking initiative is another area of strength..."
+    * **Re-classify as Development:** If a "Potential Strength" has a low score (e.g., < 3.2), group it with the "Clear Development Areas" in the final development paragraph.
+    * **True Potential:** Competencies in the mid-range (e.g., 3.2 to 3.7) should be treated as true potential areas, where you describe the positive and then introduce the gap with "However, there is some scope to...".
 
 **Step 2: Dynamic Summary Construction**
 1.  **Mandatory Opening:** The English summary MUST begin with this exact text: "Your participation in the assessment center provided insight into how you demonstrate the leadership competencies in action. The feedback below highlights observed strengths and opportunities for development to support your continued growth."
-2.  **Paragraphing Rules:** Follow this logic to structure the report:
-
-    * **IF 3 Categories are present (Strengths, Potential, and Development):**
-        * **Paragraph 1 (Clear Strengths):** Start with "You display clear strengths in several areas of leadership." Detail all "Clear Strength" competencies. Synthesize multiple high-scoring indicators into a narrative and add a concluding phrase about the impact.
-        * **Paragraph 2 (Potential Strengths):** Start with "In addition, there are areas where you demonstrate potential strengths that can be further leveraged." Detail all "Potential Strength" competencies. Describe the positives, then transition ("However, there is room to...") to explain the development gap.
-        * **Paragraph 3 (Development Areas):** Start with "In relation to the development areas..." Detail all "Development Area" competencies. **This paragraph must be purely developmental.** Focus only on what needs improvement based on the lowest-scoring indicators. Do not mix in positive framing.
-
-    * **IF 2 Categories are present:**
-        * **Paragraph 1:** Address the more positive of the two categories (Strengths > Potential Strengths).
-        * **Paragraph 2:** Address the remaining category. The language must be purely developmental if it is the "Development Area" category.
-
-    * **IF only 1 Category is present (e.g., all are 'Clear Strengths'):**
-        * **Paragraph 1:** Address the top half of the competencies (those with the highest average scores).
-        * **Paragraph 2:** Address the bottom half of the competencies. Even if they are still positive, frame this paragraph as covering competencies that, while strong, are not as pronounced as those in the first paragraph.
-        * The same logic applies if all are 'Potential Strengths' or all are 'Development Areas'. This ensures a minimum of two paragraphs.
+2.  **Paragraph 1 & 2 (Strengths & High Potential):**
+    * Weave a cohesive narrative covering all "Clear Strengths" and any "Potential Strengths" you promoted. Do not just list them.
+    * Use varied transitional phrases like "Your clear strength lie in...", "In relation to...", "Another area of strength was seen in...".
+    * For each competency, synthesize multiple high-scoring indicators into descriptive sentences. For example, instead of saying "He is good at decision making," say "You display critical thinking skills and are able to assess the situation before making informed decisions identifying potential risks and back up plans."
+    * If a promoted "Potential Strength" has a minor development area (like `E01`'s communication), mention it at the end of the strength description (e.g., "...There is some scope for you to develop your listening skills...").
+3.  **Final Paragraph (Development Areas):**
+    * Start with "In relation to the development areas, there is some room for improvement in...".
+    * This paragraph MUST group all "Clear Development Areas" AND any "Potential Strengths" that you re-classified as developmental.
+    * This paragraph must be purely developmental. Focus only on what needs improvement based on the lowest-scoring indicators. Do not mix in positive framing.
 
 **## Writing Standards & Constraints**
-* **No Scores:** The summary must NEVER mention specific numerical scores or averages. It should only contain the qualitative interpretation of the data.
+* **No Scores:** The summary must NEVER mention specific numerical scores or averages.
 * **Word Count:** Maximum 400 words total per language (excluding the mandatory opening).
 * **Source Fidelity:** Base all statements *strictly* on the indicator language.
 * **Behavioral Focus:** No technical or industry-specific jargon.
-* **MANDATORY Output Separator:** It is CRITICAL that you separate the English summary from the Arabic summary with the exact delimiter on its own line: '---ARABIC_SUMMARY---'. The parsing of the output depends entirely on this delimiter.
+* **MANDATORY Output Separator:** It is CRITICAL that you separate the English summary from the Arabic summary with the exact delimiter on its own line: '---ARABIC_SUMMARY---'.
 
 **## Bilingual Generation Mandate**
 * Generate in **both English and Arabic**, following the same dynamic structure and professional tone.
-* **Arabic Opening:** The first sentence thanking the participant MUST be in formal, written Arabic (`Lughat al-Fusha`), for example: "نشكرك على مشاركتك في مركز التقييم، مما أتاح لنا رؤية متعمقة لكيفية تجسيدك للكفاءات القيادية عمليًا."
+* **Arabic Opening:** The first sentence thanking the participant MUST be in formal, written Arabic (`Lughat al-Fusha`).
 
 ---
 **## TASK: GENERATE SCORE-BASED SUMMARY FOR THE FOLLOWING PERSON**
@@ -159,7 +156,7 @@ Analyze a list of raw comments for an individual and generate a single, final su
 * **Word Count:** Maximum 50 words per language.
 * **Tone:** Professional, constructive, and forward-looking.
 * **Consistency:** The summary MUST NOT contradict the main report.
-* **MANDATORY Output Separator:** It is CRITICAL that you separate the English summary from the Arabic summary with the exact delimiter on its own line: '---ARABIC_SUMMARY---'. The parsing of the output depends entirely on this delimiter.
+* **MANDATORY Output Separator:** It is CRITICAL that you separate the English summary from the Arabic summary with the exact delimiter on its own line: '---ARABIC_SUMMARY---'.
 
 
 **## Bilingual Generation Mandate: English and Arabic**
@@ -292,7 +289,7 @@ def process_comments_and_append(results_df, comments_df):
             eng_comment_summary, ar_summary = generate_summary_from_llm(full_prompt)
 
             results_df.at[i, 'English Summary'] += f"\n\n{eng_comment_summary}"
-            results_df.at[i, 'Arabic Summary'] += f"\n\n{ar_comment_summary}"
+            results_df.at[i, 'Arabic Summary'] += f"\n\n{ar_summary}"
         
         progress_bar.progress((i + 1) / total_people)
             
