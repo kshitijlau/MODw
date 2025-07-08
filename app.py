@@ -84,40 +84,36 @@ def get_score_summary_prompt():
 You are an expert talent management analyst and a master writer. Your style is formal, professional, objective, and constructive. You synthesize quantitative performance data into a rich, qualitative, behavioral-focused narrative. You are writing for a male individual, using the third person (`he`/`his`/`him`).
 
 **## Core Objective**
-Generate a sophisticated, multi-paragraph **English** performance summary based on scores from 8 leadership competencies.
+Generate a sophisticated, **exactly two-paragraph** English performance summary based on scores from 8 leadership competencies.
 
 **## Input Data Profile**
 You will receive a data set for one individual containing: 8 Competency Names and their average scores, plus 4 Indicator Scores and Texts for each competency.
 
+**## CRITICAL WRITING RULES**
+1.  **NO COMPETENCY NAMES:** You MUST NOT use the literal competency names (e.g., 'Adaptability', 'Strategic Thinking') in the final summary.
+2.  **USE VERB PHRASES:** Instead of names, you MUST describe the competency as a behavior or skill using a verb phrase.
+    * **Example INSTEAD OF:** "He is strong in Strategic Thinking."
+    * **Example DO THIS:** "He demonstrates a strong ability to think strategically and connect long-term goals to daily actions."
+3.  **NO BOLDING:** Do not use markdown for bolding (`**`) or any other special formatting in the output.
+4.  **STRICT 2-PARAGRAPH STRUCTURE:** The output must always have exactly two paragraphs.
+
 **## Core Logic & Execution Flow**
+1.  **Analyze and Group:** Mentally sort the 8 competencies by their average scores, from highest to lowest.
+2.  **Mandatory Opening:** The first paragraph MUST begin with this exact text: "Your participation in the assessment center provided insight into how you demonstrate the leadership competencies in action. The feedback below highlights observed strengths and opportunities for development to support your continued growth."
+3.  **Paragraph 1 (Strengths Narrative):**
+    * This paragraph should cover the individual's strongest areas, typically the top 4 competencies.
+    * Weave these strengths into a cohesive narrative. Start with the most prominent strength and transition smoothly to others.
+    * For each strength, synthesize the highest-scoring indicator texts into a rich, descriptive sentence that explains *how* he demonstrates that skill.
+4.  **Paragraph 2 (Development Narrative):**
+    * This paragraph should cover the areas with the most opportunity for growth, typically the bottom 4 competencies.
+    * Frame these points constructively. For competencies that are still positive but lower-scoring, you can introduce them with phrases like "To further enhance his effectiveness...".
+    * For clear development areas, be direct but professional.
+    * For each point, synthesize the lowest-scoring indicator texts to explain the development opportunity. For example, if 'listening skills' is a low-scoring indicator within a communication competency, the summary should mention the need to "enhance his listening skills to ensure all team members feel fully heard."
 
-**Step 1: Advanced Categorization & Editorial Judgment**
-1.  First, perform an initial categorization of the 8 competencies based on average score:
-    * **Clear Strength:** Average score >= 4.0
-    * **Potential Strength:** Average score between 2.6 and 3.9
-    * **Clear Development Area:** Average score <= 2.5
-2.  **Apply Editorial Judgment:** Re-evaluate the "Potential Strength" category to create a more human-like narrative.
-    * **Promote to Strength:** If a "Potential Strength" has a high score (e.g., > 3.7), treat it as a strength in your writing. You can introduce it with phrases like "Taking initiative is another area of strength..."
-    * **Re-classify as Development:** If a "Potential Strength" has a low score (e.g., < 3.2), group it with the "Clear Development Areas" in the final development paragraph.
-    * **True Potential:** Competencies in the mid-range (e.g., 3.2 to 3.7) should be treated as true potential areas, where you describe the positive and then introduce the gap with "However, there is some scope to...".
-
-**Step 2: Dynamic Summary Construction**
-1.  **Mandatory Opening:** The English summary MUST begin with this exact text: "Your participation in the assessment center provided insight into how you demonstrate the leadership competencies in action. The feedback below highlights observed strengths and opportunities for development to support your continued growth."
-2.  **Paragraph 1 & 2 (Strengths & High Potential):**
-    * Weave a cohesive narrative covering all "Clear Strengths" and any "Potential Strengths" you promoted. Do not just list them.
-    * Use varied transitional phrases like "Your clear strength lie in...", "In relation to...", "Another area of strength was seen in...".
-    * For each competency, synthesize multiple high-scoring indicators into descriptive sentences. For example, instead of saying "He is good at decision making," say "You display critical thinking skills and are able to assess the situation before making informed decisions identifying potential risks and back up plans."
-    * If a promoted "Potential Strength" has a minor development area (like `E01`'s communication), mention it at the end of the strength description (e.g., "...There is some scope for you to develop your listening skills...").
-3.  **Final Paragraph (Development Areas):**
-    * Start with "In relation to the development areas, there is some room for improvement in...".
-    * This paragraph MUST group all "Clear Development Areas" AND any "Potential Strengths" that you re-classified as developmental.
-    * This paragraph must be purely developmental. Focus only on what needs improvement based on the lowest-scoring indicators. Do not mix in positive framing.
-
-**## Writing Standards & Constraints**
-* **No Scores:** The summary must NEVER mention specific numerical scores or averages.
+**## Final Output Constraints**
 * **Word Count:** Maximum 400 words (excluding the mandatory opening).
-* **Source Fidelity:** Base all statements *strictly* on the indicator language.
-* **Behavioral Focus:** No technical or industry-specific jargon.
+* **Source Fidelity:** Base all statements *strictly* on the indicator language provided.
+* **No Scores:** The summary must NEVER mention specific numerical scores or averages.
 
 ---
 **## TASK: GENERATE SCORE-BASED SUMMARY FOR THE FOLLOWING PERSON**
@@ -169,7 +165,7 @@ Translate the provided English text into formal, professional Arabic (`Lughat al
 1.  Read the English text provided after the '---' delimiter.
 2.  Translate it into Arabic, ensuring the translation is not literal but captures the professional nuance, tone, and intent of the original text.
 3.  The opening sentence about "participation in the assessment center" must be particularly formal and well-written.
-4.  Maintain all formatting, such as paragraphs and bolded text.
+4.  The translation must adhere to the same narrative style as the English, describing behaviors with verb phrases rather than using direct competency names.
 
 **## Writing Standards & Constraints**
 * **Language:** Formal, written Arabic.
