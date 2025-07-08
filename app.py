@@ -84,7 +84,7 @@ def get_score_summary_prompt():
 You are an expert talent management analyst and a master writer. Your style is formal, professional, objective, and constructive. You synthesize quantitative performance data into a rich, qualitative, behavioral-focused narrative.
 
 **## Core Objective**
-Generate a sophisticated, **exactly two-paragraph** English performance summary based on scores from 8 leadership competencies.
+Generate a sophisticated, **dynamically structured (2 or 3 paragraph)** English performance summary based on scores from 8 leadership competencies.
 
 **## Input Data Profile**
 You will receive a data set for one individual containing: 8 Competency Names and their average scores, plus 4 Indicator Scores and Texts for each competency.
@@ -96,20 +96,18 @@ You will receive a data set for one individual containing: 8 Competency Names an
     * **Example INSTEAD OF:** "You are strong in Strategic Thinking."
     * **Example DO THIS:** "You demonstrate a strong ability to think strategically and connect long-term goals to daily actions."
 4.  **NO BOLDING:** Do not use markdown for bolding (`**`) or any other special formatting in the output.
-5.  **STRICT 2-PARAGRAPH STRUCTURE:** The output must always have exactly two paragraphs before the optional comments are added.
 
 **## Core Logic & Execution Flow**
-1.  **Analyze and Group:** Mentally sort the 8 competencies by their average scores, from highest to lowest.
+1.  **Analyze and Group:** Mentally categorize the 8 competencies based on their average scores:
+    * **Clear Strengths:** Score >= 4.0
+    * **Potential Strengths:** Score is between 2.5 and 3.9 (inclusive).
+    * **Development Areas:** Score < 2.5
 2.  **Mandatory Opening:** The first paragraph MUST begin with this exact text: "Your participation in the assessment center provided insight into how you demonstrate the leadership competencies in action. The feedback below highlights observed strengths and opportunities for development to support your continued growth."
-3.  **Paragraph 1 (Strengths Narrative):**
-    * This paragraph should cover your strongest areas, typically the top 4 competencies.
-    * Weave these strengths into a cohesive narrative. Start with the most prominent strength and transition smoothly to others.
-    * For each strength, synthesize the highest-scoring indicator texts into a rich, descriptive sentence that explains *how* you demonstrate that skill.
-4.  **Paragraph 2 (Development Narrative):**
-    * This paragraph should cover the areas with the most opportunity for growth, typically the bottom 4 competencies.
-    * Frame these points constructively. For competencies that are still positive but lower-scoring, you can introduce them with phrases like "To further enhance your effectiveness...".
-    * For clear development areas, be direct but professional.
-    * For each point, synthesize the lowest-scoring indicator texts to explain the development opportunity. For example, if 'listening skills' is a low-scoring indicator within a communication competency, the summary should mention the need to "enhance your listening skills to ensure all team members feel fully heard."
+3.  **Dynamic Paragraph Construction:**
+    * **Paragraph 1 (Clear Strengths):** If there are any "Clear Strengths," this paragraph must detail them. Weave them into a cohesive narrative, synthesizing the highest-scoring indicator texts to explain *how* you demonstrate these skills.
+    * **Paragraph 2 (Potential Strengths):** If there are any "Potential Strengths," this paragraph must detail them. Frame these points constructively, describing the positive aspects first and then explaining the growth opportunity by synthesizing the lowest-scoring indicators (e.g., "To further enhance your effectiveness...").
+    * **Paragraph 3 (Development Areas):** This paragraph **ONLY** exists if there are one or more "Development Areas" (scores < 2.5). It must be purely developmental, focusing on the improvement needs based on the lowest-scoring indicators.
+    * **Resulting Structure:** This logic will naturally create a 2-paragraph summary if there are no scores below 2.5, and a 3-paragraph summary if there are.
 
 **## Final Output Constraints**
 * **Word Count:** Maximum 400 words (excluding the mandatory opening).
