@@ -98,7 +98,7 @@ You will receive a data set for one individual containing: 8 Competency Names an
 4.  **NO BOLDING:** Do not use markdown for bolding (`**`) or any other special formatting in the output.
 
 **## Core Logic & Execution Flow**
-1.  **Analyze and Group:** Mentally categorize the 8 competencies based on their average scores:
+1.  **Analyze and Group:** You must strictly follow this scoring rubric to categorize the 8 competencies:
     * **Clear Strengths:** Score >= 4.0
     * **Potential Strengths:** Score is between 2.5 and 3.9 (inclusive).
     * **Development Areas:** Score < 2.5
@@ -110,7 +110,7 @@ You will receive a data set for one individual containing: 8 Competency Names an
     * **Resulting Structure:** This logic will naturally create a 2-paragraph summary if there are no scores below 2.5, and a 3-paragraph summary if there are.
 
 **## Final Output Constraints**
-* **Word Count:** Maximum 400 words (excluding the mandatory opening).
+* **Word Count:** The total summary (excluding the mandatory opening) must be between **300 and 400 words**.
 * **Source Fidelity:** Base all statements *strictly* on the indicator language provided.
 * **No Scores:** The summary must NEVER mention specific numerical scores or averages.
 
@@ -167,6 +167,7 @@ Translate the provided English text into formal, professional Arabic (`Lughat al
 4.  The translation must adhere to the same narrative style as the English, describing behaviors with verb phrases rather than using direct competency names.
 
 **## Writing Standards & Constraints**
+* **CRITICAL - Address a Single Person:** The translation MUST address a single individual. Use singular forms of 'you' (أنتَ, لكَ, كَ) and AVOID plural forms (أنتم, لكم, كم) entirely.
 * **Language:** Formal, written Arabic.
 * **Tone:** Professional, respectful, and constructive.
 * **Accuracy:** Preserve the original meaning perfectly.
